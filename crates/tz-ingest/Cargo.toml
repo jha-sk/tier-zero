@@ -1,0 +1,22 @@
+[package]
+name = "tz-ingest"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
+tz-core = { workspace = true }
+anyhow = { workspace = true }
+thiserror = { workspace = true }
+tracing = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+quick-xml = { workspace = true }
+lol_html = { workspace = true }
+regex = { workspace = true }
+once_cell = { workspace = true }
+text-splitter = { workspace = true }
+tokenizers = { workspace = true }
+rayon = { workspace = true }
+clap = { workspace = true }
+indicatif = { workspace = true }
