@@ -18,6 +18,7 @@ Qdrant 1.19.1 on loopback gRPC, co-located with the client.
 | 844,092 (full 1.21 GB) | 6 MB |
 
 4.2x the input for 1.2x the memory. 65,841 rows/s, 94.5 MB/s.
+Raw output: [corpus-scan.md](corpus-scan.md)
 
 Corpus: 325,169 questions, 514,457 answers, 3,920 distinct tags. 47.1% of
 questions have an accepted answer; 31.6% of posts contain code.

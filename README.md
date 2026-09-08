@@ -1,33 +1,75 @@
 # TierZero
 
-**An SLO-enforced agentic RAG system for tier-zero IT support.**
+**A retrieval system for IT support questions, built to hold three hard budgets
+at once — and measured honestly enough to admit when it doesn't.**
 
-Built to answer one question: can a retrieval-augmented system hold hard latency,
-cost, and quality budgets at the same time — and can every number be traced back
-to the command that produced it?
+Ask it *"why is nginx returning 502 after an upgrade"* and it searches 638,156
+chunks of a real operations knowledge base and returns cited passages in about
+30 milliseconds, for about a penny and a half a question.
 
-Corpus: the Server Fault archive (Stack Exchange, CC BY-SA), framed as an
-internal IT/DevOps knowledge base. 844,092 posts, 1.21 GB of XML.
+Written in Rust. 206 tests. Every number below is reproducible with the command
+printed beside it.
+
+## The three headline numbers
+
+| Budget, declared before any code was written | Target | Measured | |
+|---|---|---|---|
+| Answer quality — recall@50 | ≥ 0.85 | **0.857** | ✅ |
+| Cost per question | ≤ $0.06 | **$0.0149** | ✅ 4× headroom |
+| Retrieval latency p95 | ≤ 25 ms | **31.5 ms** | ❌ missed by 17% |
+
+**The failure is the interesting one.** It is diagnosed, not hidden: a 5 ms fix
+is measured and available, and it was deliberately not taken, because it trades
+away recall — and recall is the metric actually under pressure. Optimising the
+number that isn't binding is how systems get worse while their dashboards get
+better.
+
+## What makes this different from a tutorial RAG project
+
+**The eval set is human-labelled, not model-generated.** 4,437 query/document
+pairs come from moderator duplicate rulings on Server Fault — a person read two
+questions and judged that one answers the other. Most portfolio projects grade
+retrieval with an LLM, which means the model being evaluated and the model doing
+the grading share the same blind spots.
+
+**Three assumptions were measured and found wrong.** INT8 quantization made
+embedding *2× slower*, not faster. Pinning ONNX to one thread was *2.3× worse*
+than the default. Hybrid dense+sparse retrieval *lost* to dense alone. Each is
+written up with the evidence, because a project where every hypothesis was
+confirmed is a project that wasn't really testing anything.
+
+**Ten bugs are catalogued, and none of them raised an error.** A chunk silently
+truncated at 2,564 tokens. A dashboard reporting 4,750 ms for an 80 ms
+operation. A load generator reporting its *best* latency while the system
+saturated. A prompt-cache breakpoint that could never fire. Silent failure is the
+normal failure mode in this domain, and finding them is the actual work.
+
+## What is and isn't built
+
+Retrieval, ingestion, evaluation, caching, routing, budget enforcement,
+observability and load testing are built and measured. **The generation path is
+built and unit-tested but has never called a live model** — there was no API
+budget, so answer quality is unmeasured and cost is computed analytically from
+real token counts rather than from billed usage. Both limits are stated wherever
+the numbers appear.
 
 ---
 
-## Status
+## The budgets in full
 
-Under construction. This README reports **only measurements that have actually
-been taken**; sections covering unbuilt components say so explicitly. Numbers
-below are reproducible with the commands beside them.
+The headline table above rounds. These are the exact figures and the conditions
+they were taken under.
 
-## Budgets, declared before the work started
-
-| Budget | Target | State |
+| Budget | Target | Measured |
 |---|---|---|
-| Retrieval p95 (embed + search + fusion + payload) | ≤ 25 ms | **29.21 ms eval shape / 25.49 ms production shape — FAIL**, 5 ms fix measured and available |
-| Cost p95 per answered request | ≤ $0.06 | **$0.01493 — PASS**, 4x headroom, holds across ±20% tokenizer error |
-| TTFT p95 / total p95 | ≤ 1 s / ≤ 5 s | not yet built |
-| Recall@50 on the golden set | ≥ 0.85 | **0.857 — PASS** with body queries; 0.757 with title-only |
+| Retrieval p95 (embed + search + fusion + payload) | ≤ 25 ms | **29.21 ms** at eval query shape, **25.49 ms** at production shape — FAIL |
+| Cost p95 per answered request | ≤ $0.06 | **$0.01493** — PASS, holds across ±20% tokenizer error |
+| Recall@50 on the golden set | ≥ 0.85 | **0.857** with body queries; 0.757 title-only — PASS |
+| TTFT p95 / total p95 | ≤ 1 s / ≤ 5 s | **not measured** — requires a live model call |
 
-The quality budget is not decoration. The other three can all be satisfied by
-returning garbage instantly and for free.
+Quality is a budget, not a nicety. The other three can all be satisfied by
+returning garbage instantly and for free, which is why a system with only
+latency and cost SLOs will happily optimise itself into uselessness.
 
 ---
 
@@ -314,9 +356,9 @@ right; a full run establishes that the *assumptions* are.
 
 ---
 
-## What is not built
+## Scope: what was left out, and why
 
-Listed so the absence is not mistaken for a passing result.
+Listed so an absence is never mistaken for a passing result.
 
 | Area | State |
 |---|---|
@@ -369,6 +411,9 @@ bsdtar -xf data/raw/serverfault.com.7z -C data/serverfault Posts.xml PostLinks.x
 - [0003 — 512/10% chunking; code blocks are atomic](docs/adr/0003-chunking.md)
 - [0004 — Four-way token accounting against a versioned price table](docs/adr/0004-cost-model.md)
 - [0005 — Bound the embedding batch; attention is quadratic in sequence length](docs/adr/0005-ingest-memory-and-batching.md)
+- [0006 — Guard the semantic cache by query class, not by threshold alone](docs/adr/0006-semantic-cache-guards.md)
+- [0007 — A router and one agent, not a multi-agent system](docs/adr/0007-single-agent-with-routing.md)
+- [0008 — Run Qdrant as a binary, not only under Docker](docs/adr/0008-standalone-qdrant.md)
 
 Full benchmark report: [docs/benchmarks/](docs/benchmarks/README.md)
 
