@@ -1,0 +1,54 @@
+exporting metrics to http://127.0.0.1:4317
+collection       tz_10k
+points           17813  (indexed 38870)
+golden set       4437 pairs, corpus 582503f90dbd
+measuring on     300 held-out queries
+transport        gRPC, loopback, co-located
+
+BM25 statistics loaded: 17813 docs, 97821 terms
+
+retriever     p50 ms    p95 ms  recall@10  recall@50 recall@100       mrr
+------------------------------------------------------------------------
+  -- query shape: title --
+dense          26.93     31.54      0.560      0.757      0.820     0.362
+sparse         20.53     22.93      0.430      0.587      0.663     0.235
+hybrid         37.92     46.98      0.543      0.730      0.810     0.332
+  -- query shape: body --
+dense          36.03     41.70      0.673      0.857      0.907     0.471
+sparse         27.14     32.53      0.540      0.717      0.793     0.301
+hybrid         52.51     60.67      0.663      0.830      0.893     0.428
+
+hnsw_ef    p50 ms    p95 ms    p99 ms  recall@10  recall@50 recall@100       mrr
+------------------------------------------------------------------------------------
+     32     27.52     31.76     34.75      0.560      0.757      0.820     0.362
+     64     27.25     31.97     33.44      0.560      0.757      0.820     0.362
+    128     26.99     32.35     34.62      0.560      0.757      0.820     0.362
+    256     26.73     31.52     33.50      0.560      0.757      0.820     0.362
+
+per-stage at hnsw_ef=128 (the 25ms budget)
+stage                   n    p50 ms    p95 ms    p99 ms    max ms
+----------------------------------------------------------------
+embed                 300     11.18     14.98     17.55     20.89
+qdrant_search         300     15.13     17.81     19.39     25.70
+decode                300      0.59      1.24      1.36      1.71
+retrieval_total       300     27.10     31.86     34.24     39.01
+
+cold first query   27.99 ms   (reported separately, never in the p95)
+
+recall@1           0.267
+recall@5           0.483
+recall@10          0.560
+recall@50          0.757   <- SLO floor is 0.85
+recall@100         0.820
+nDCG@10            0.402
+MRR                0.362
+complete misses    54 of 300
+
+distinct docs per query from 500 chunks: p50=325 min=222
+  (must be >= 100 for recall@100 to mean what it says)
+
+SLO retrieval p95  31.86 ms vs 25 ms budget   FAIL
+SLO recall@50      0.757 vs 0.85 floor          FAIL
+
+note: duplicate judgements name *a* relevant document, not every
+      one, so these recall figures are a lower bound.

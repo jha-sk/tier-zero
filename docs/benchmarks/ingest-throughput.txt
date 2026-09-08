@@ -1,0 +1,32 @@
+   Compiling tz-embed v0.1.0 (/home/sourabh/Projects/New/tier-zero/crates/tz-embed)
+    Finished `release` profile [optimized] target(s) in 1.34s
+     Running `target/release/examples/ingest_throughput`
+TierZero ingest throughput
+
+encoder             batch  tokens         n   elapsed s     chunks/s
+----------------------------------------------------------------------
+bge-small (12L)        16     128       128        5.74         22.3
+bge-small (12L)        16     350       128       16.97          7.5
+bge-small (12L)        32     128       128        5.53         23.1
+bge-small (12L)        32     350       128       17.20          7.4
+bge-small (12L)        64     128       128        5.64         22.7
+bge-small (12L)        64     350       128       23.63          5.4
+minilm-l6 (6L)         16     128       128        2.74         46.6
+minilm-l6 (6L)         16     350       128        8.85         14.5
+minilm-l6 (6L)         32     128       128        2.83         45.2
+minilm-l6 (6L)         32     350       128        8.86         14.5
+minilm-l6 (6L)         64     128       128        2.89         44.2
+minilm-l6 (6L)         64     350       128       10.54         12.1
+
+fastest row (128-token chunks, NOT this corpus): 46.6 chunks/s [minilm-l6 (6L) batch=16 tokens=128]
+
+at the corpus's measured median chunk length (350 tokens):
+  14.5 chunks/s  [minilm-l6 (6L) batch=16]
+  full corpus     638156 chunks -> 12.3 h
+  100k chunks     100000 chunks -> 1.9 h
+  40k chunks       40000 chunks -> 0.8 h
+
+CPU embedding is the ingest bottleneck, and it is a hard one:
+sequence length dominates (2.7x tokens costs 3.3x time), while
+batch size is within noise. There is no configuration that makes
+the full corpus a same-day job on this hardware.

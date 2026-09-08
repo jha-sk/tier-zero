@@ -1,0 +1,39 @@
+GOLD DONE
+  1024 docs (1024 gold)  2217 chunks  6.5 chunks/s  [chunk 1s embed 340s upsert 0s]
+  1536 docs (1536 gold)  3542 chunks  7.0 chunks/s  [chunk 1s embed 506s upsert 0s]
+  1775 docs (1775 gold)  4265 chunks  7.1 chunks/s  [chunk 1s embed 592s upsert 0s]
+points: 4265 indexed: 0
+     32     75.65    106.94    117.18      0.753      0.867      0.920     0.536
+     64     80.38    112.58    120.64      0.753      0.867      0.920     0.536
+    128     74.88    105.79    116.61      0.753      0.867      0.920     0.536
+    256     84.67    116.80    124.80      0.753      0.867      0.920     0.536
+
+per-stage at hnsw_ef=128 (the 25ms budget)
+stage                   n    p50 ms    p95 ms    p99 ms    max ms
+----------------------------------------------------------------
+embed                 150     40.93     80.13     89.34     90.75
+qdrant_search         150     33.09     62.94     73.15     74.56
+decode                150      3.05      6.70      9.67     13.00
+retrieval_total       150     82.50    115.39    123.14    126.21
+
+cold first query   104.92 ms   (reported separately, never in the p95)
+
+recall@1           0.420
+recall@5           0.660
+recall@10          0.753
+recall@50          0.867   <- SLO floor is 0.85
+recall@100         0.920
+nDCG@10            0.584
+MRR                0.536
+complete misses    12 of 150
+
+distinct docs per query from 500 chunks: p50=254 min=205
+  (must be >= 100 for recall@100 to mean what it says)
+
+SLO retrieval p95  115.39 ms vs 25 ms budget   FAIL
+SLO recall@50      0.867 vs 0.85 floor          PASS
+
+note: duplicate judgements name *a* relevant document, not every
+      one, so these recall figures are a lower bound.
+
+[exited with code 0]

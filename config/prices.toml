@@ -1,0 +1,49 @@
+# Anthropic model prices, in USD per million tokens.
+#
+# This file is DATA, not configuration to be tuned. Its `version` is stamped
+# onto every cost figure TierZero emits, so a cost reported in a benchmark can
+# be recomputed exactly as it was reported even after prices change.
+#
+# To update: bump `version`, set `fetched_at` to today, and leave the old entry
+# in git history. Never edit prices in place without bumping the version.
+
+version = "2026-09-06.1"
+fetched_at = "2026-09-06"
+source = "https://platform.claude.com/docs/en/docs/about-claude/pricing"
+currency = "USD"
+
+# Multipliers applied to the base input rate, per Anthropic's published terms:
+#   cache write, 5-minute TTL : 1.25x input
+#   cache write, 1-hour TTL   : 2.00x input
+#   cache read                : 0.10x input
+
+[models."claude-haiku-4-5"]
+input_per_mtok          = 1.00
+output_per_mtok         = 5.00
+cache_write_5m_per_mtok = 1.25
+cache_write_1h_per_mtok = 2.00
+cache_read_per_mtok     = 0.10
+
+[models."claude-sonnet-5"]
+input_per_mtok          = 2.00
+output_per_mtok         = 10.00
+cache_write_5m_per_mtok = 2.50
+cache_write_1h_per_mtok = 4.00
+cache_read_per_mtok     = 0.20
+
+[models."claude-opus-5"]
+input_per_mtok          = 5.00
+output_per_mtok         = 25.00
+cache_write_5m_per_mtok = 6.25
+cache_write_1h_per_mtok = 10.00
+cache_read_per_mtok     = 0.50
+
+# Local ONNX embedding. Zero marginal cost by construction: it runs in-process
+# on CPU, which is the decision that makes the 25ms retrieval budget reachable.
+# Its cost shows up as latency and RAM, tracked separately, not as dollars.
+[models."bge-small-en-v1.5-int8"]
+input_per_mtok          = 0.00
+output_per_mtok         = 0.00
+cache_write_5m_per_mtok = 0.00
+cache_write_1h_per_mtok = 0.00
+cache_read_per_mtok     = 0.00

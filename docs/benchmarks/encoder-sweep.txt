@@ -1,0 +1,32 @@
+TierZero encoder sweep -- query embedding latency
+50 warmup + 300 sampled single-query embeds per row
+
+encoder                    threads maxlen   p50 ms   p95 ms   p99 ms   max ms   load ms
+----------------------------------------------------------------------------------------
+bge-small-fp32                   1     64    18.89    19.95    20.99    26.37       416
+bge-small-fp32                   1    512    13.05    14.13    15.21    20.94       268
+bge-small-fp32                   2     64     8.65     9.43     9.73    10.44       203
+bge-small-fp32                   2    512     8.42    11.06    11.95    12.83       200
+bge-small-fp32                   4     64     7.74     8.94    10.13    11.90       194
+bge-small-fp32                   4    512     7.99    10.07    11.26    11.49       197
+bge-small-fp32             default     64     7.84     8.75     9.07    10.26       197
+bge-small-fp32             default    512     8.11     9.08     9.61     9.69       196
+bge-small-int8                   1     64    24.22    25.49    26.09    26.93       118
+bge-small-int8                   1    512    24.21    25.60    26.45    26.89       116
+bge-small-int8                   2     64    17.01    18.70    21.02    28.59       114
+bge-small-int8                   2    512    16.83    18.34    19.39    20.43       120
+bge-small-int8                   4     64    14.48    16.14    16.85    17.44       117
+bge-small-int8                   4    512    14.50    16.21    16.75    18.18       123
+bge-small-int8             default     64    14.91    15.96    16.69    30.41       150
+bge-small-int8             default    512    14.95    16.59    17.54    19.49       139
+minilm-l6-fp32                   1     64     4.35     5.46     5.79     6.12       110
+minilm-l6-fp32                   1    512     4.33     5.47     5.91     6.90       110
+minilm-l6-fp32                   2     64     3.19     3.76     4.02     4.78       117
+minilm-l6-fp32                   2    512     3.15     3.71     3.96     4.23       110
+minilm-l6-fp32                   4     64     3.38     4.16     4.50     4.84       110
+minilm-l6-fp32                   4    512     3.07     3.71     3.94     3.98       112
+minilm-l6-fp32             default     64     3.34     4.04     4.43     4.87       110
+minilm-l6-fp32             default    512     3.39     3.99     4.28     4.49       110
+
+best p95: 3.71ms  [minilm-l6-fp32 threads=2 maxlen=512]
+retrieval budget is 25ms total; this stage should stay under ~9ms to leave room for search, fusion and payload fetch.

@@ -1,0 +1,36 @@
+TierZero cost measurement
+price table 2026-09-06.1 (fetched 2026-09-06)
+300 held-out queries, real retrieval, real prompts
+
+routing
+  tier_0      0 requests ( 0.0%)
+  tier_1    282 requests (94.0%)
+  tier_2     18 requests ( 6.0%)
+
+input tokens per request
+  p50 4707   p95 5484   p99 5782   max 5920
+  system prompt 170 tokens (fixed)
+
+cost per request (output charged at max_tokens=900, worst case)
+  p50 $0.00927   p95 $0.01493   p99 $0.01594   max $0.01642
+
+cost by tier
+  tier_1   p50 $0.00924   p95 $0.00998
+  tier_2   p50 $0.01554   p95 $0.01625
+
+SLO cost p95   $0.01493 vs $0.06 budget   PASS
+
+sensitivity to tokenizer error (this uses a wordpiece proxy)
+  tokens -20%   p95 $0.01194   PASS
+  tokens -10%   p95 $0.01344   PASS
+  tokens  +0%   p95 $0.01493   PASS
+  tokens +10%   p95 $0.01642   PASS
+  tokens +20%   p95 $0.01791   PASS
+
+prompt caching
+  claude-haiku-4-5: system prefix is 170 tokens, minimum cacheable is 2048.
+     The cache_control marker is SILENTLY IGNORED -- no error is raised
+     and cache_read_input_tokens stays at zero.
+  claude-sonnet-5: system prefix is 170 tokens, minimum cacheable is 1024.
+     The cache_control marker is SILENTLY IGNORED -- no error is raised
+     and cache_read_input_tokens stays at zero.

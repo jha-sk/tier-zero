@@ -1,0 +1,13 @@
+=== searchbench done; starting load test ===
+collection tz_10k  points 17813
+open-model load, constant arrival rate, 8s per step
+latency is corrected for coordinated omission
+
+rate     10/s  n=80     err=0    corrected p50/p95/p99   20.96/  25.49/  27.44 ms   uncorrected p95   24.14 ms   max sched delay     1.46 ms
+rate     25/s  n=200    err=0    corrected p50/p95/p99   20.29/  25.93/  28.54 ms   uncorrected p95   25.14 ms   max sched delay     1.48 ms
+rate     50/s  n=400    err=0    corrected p50/p95/p99   16.98/  52.96/  93.57 ms   uncorrected p95   21.05 ms   max sched delay    89.86 ms  << GENERATOR FELL BEHIND
+
+knee reached: the generator could not sustain 50/s.
+Numbers above this rate would describe a load the system never served.
+
+[exited with code 0]
