@@ -1,0 +1,12 @@
+# Build output
+/target
+
+# Corpus, model cache, downloaded binaries. All reproducible from the commands
+# in the README; none of it belongs in git.
+/data
+/.fastembed_cache
+**/.fastembed_cache
+
+# Runtime state from the standalone observability stack: logs, Prometheus TSDB,
+# Tempo blocks. The configs that produce it are tracked; the output is not.
+/deploy/standalone/run/
