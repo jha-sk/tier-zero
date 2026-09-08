@@ -1,0 +1,24 @@
+[package]
+name = "tz-agent"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
+tz-core = { workspace = true }
+tz-obs = { workspace = true }
+tz-ingest = { workspace = true }
+tz-eval = { workspace = true }
+qdrant-client = { workspace = true }
+tz-embed = { workspace = true }
+tz-retrieve = { workspace = true }
+anyhow = { workspace = true }
+thiserror = { workspace = true }
+tracing = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+reqwest = { workspace = true }
+tokio = { workspace = true }
+futures = { workspace = true }
+regex = { workspace = true }
+once_cell = { workspace = true }

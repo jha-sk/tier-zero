@@ -1,0 +1,15 @@
+[package]
+name = "tz-cache"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
+tz-core = { workspace = true }
+tz-embed = { workspace = true }
+anyhow = { workspace = true }
+tracing = { workspace = true }
+serde = { workspace = true }
+blake3 = { workspace = true }
+regex = { workspace = true }
+once_cell = { workspace = true }
