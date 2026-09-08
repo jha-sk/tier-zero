@@ -1,0 +1,17 @@
+[package]
+name = "tz-eval"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
+tz-core = { workspace = true }
+tz-ingest = { workspace = true }
+anyhow = { workspace = true }
+thiserror = { workspace = true }
+tracing = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+clap = { workspace = true }
+blake3 = { workspace = true }
+rand = { workspace = true }
