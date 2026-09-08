@@ -1,0 +1,14 @@
+# Standalone Prometheus. Identical scrape targets to the Compose config, but on
+# loopback rather than Docker service names.
+global:
+  scrape_interval: 5s
+  evaluation_interval: 15s
+
+scrape_configs:
+  - job_name: tierzero
+    static_configs:
+      - targets: ['127.0.0.1:8889']   # otel-collector prometheus exporter
+  - job_name: qdrant
+    metrics_path: /metrics
+    static_configs:
+      - targets: ['127.0.0.1:6333']

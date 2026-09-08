@@ -1,0 +1,31 @@
+receivers:
+  otlp:
+    protocols:
+      grpc: { endpoint: 127.0.0.1:4317 }
+      http: { endpoint: 127.0.0.1:4318 }
+
+processors:
+  batch: { timeout: 5s, send_batch_size: 1024 }
+
+exporters:
+  otlphttp/tempo:
+    endpoint: http://127.0.0.1:4418
+    tls: { insecure: true }
+  debug:
+    verbosity: normal
+  prometheus:
+    endpoint: 127.0.0.1:8889
+    # Keep resource attributes as labels so metrics slice by tenant, tier and
+    # model without a join.
+    resource_to_telemetry_conversion: { enabled: true }
+
+service:
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [otlphttp/tempo]
+    metrics:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [prometheus, debug]

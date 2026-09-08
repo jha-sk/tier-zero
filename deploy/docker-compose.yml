@@ -1,0 +1,111 @@
+# TierZero local stack. Everything runs on one machine; there is no cloud spend.
+#
+# Qdrant settings below follow the "minimize latency" posture: search work is
+# parallelised across segments within a single request, and the optimizer is
+# constrained so that ingest cannot monopolise cores and blow the query tail.
+
+name: tier-zero
+
+services:
+  qdrant:
+    image: qdrant/qdrant:v1.16.1
+    container_name: tz-qdrant
+    restart: unless-stopped
+    ports:
+      - "6333:6333"   # REST
+      - "6334:6334"   # gRPC
+    volumes:
+      - qdrant_storage:/qdrant/storage
+    environment:
+      # One segment per core: a single query fans out across segments, which is
+      # the lever that trades throughput for single-query latency.
+      QDRANT__STORAGE__OPTIMIZERS__DEFAULT_SEGMENT_NUMBER: "12"
+      # Leave headroom so indexing cannot starve the query path. Qdrant's own
+      # measurements show p95 going from 7.6ms to 2.0s while segments drain.
+      QDRANT__STORAGE__OPTIMIZERS__MAX_OPTIMIZATION_THREADS: "2"
+      QDRANT__STORAGE__PERFORMANCE__OPTIMIZER_CPU_BUDGET: "6"
+      # Vacuum aggressively: at a 0.5 threshold a 25%-deleted segment showed
+      # 4.3ms p95 versus 22.7ms at 0.2.
+      QDRANT__STORAGE__OPTIMIZERS__DELETED_THRESHOLD: "0.5"
+      QDRANT__SERVICE__ENABLE_TLS: "false"
+      QDRANT__TELEMETRY_DISABLED: "true"
+      QDRANT__LOG_LEVEL: "INFO"
+    healthcheck:
+      # Qdrant images ship no shell utilities; use its own binary as the probe.
+      test: ["CMD", "/qdrant/qdrant", "--version"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    deploy:
+      resources:
+        limits:
+          memory: 12G
+
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:0.144.0
+    container_name: tz-otel
+    restart: unless-stopped
+    command: ["--config=/etc/otel/config.yaml"]
+    volumes:
+      - ./otel-collector.yaml:/etc/otel/config.yaml:ro
+    ports:
+      - "4317:4317"   # OTLP gRPC
+      - "4318:4318"   # OTLP HTTP
+      - "8889:8889"   # Prometheus scrape target
+    depends_on:
+      tempo:
+        condition: service_started
+
+  tempo:
+    image: grafana/tempo:2.9.1
+    container_name: tz-tempo
+    restart: unless-stopped
+    command: ["-config.file=/etc/tempo/tempo.yaml"]
+    volumes:
+      - ./tempo.yaml:/etc/tempo/tempo.yaml:ro
+      - tempo_data:/var/tempo
+    ports:
+      - "3200:3200"
+
+  prometheus:
+    image: prom/prometheus:v3.7.3
+    container_name: tz-prometheus
+    restart: unless-stopped
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --storage.tsdb.retention.time=15d
+      # Native histograms keep percentile accuracy that bucketed histograms lose,
+      # which matters when the whole claim is a p95 against a 25ms budget.
+      - --enable-feature=native-histograms
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prom_data:/prometheus
+    ports:
+      - "9090:9090"
+
+  grafana:
+    image: grafana/grafana:12.3.1
+    container_name: tz-grafana
+    restart: unless-stopped
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: admin
+      GF_AUTH_ANONYMOUS_ENABLED: "true"
+      GF_AUTH_ANONYMOUS_ORG_ROLE: Admin
+      GF_FEATURE_TOGGLES_ENABLE: traceqlEditor
+    volumes:
+      - ./grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./grafana/dashboards:/var/lib/grafana/dashboards:ro
+      - grafana_data:/var/lib/grafana
+    ports:
+      - "3000:3000"
+    depends_on:
+      - prometheus
+      - tempo
+
+volumes:
+  qdrant_storage:
+  tempo_data:
+  prom_data:
+  grafana_data:

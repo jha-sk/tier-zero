@@ -1,0 +1,20 @@
+# Tempo 3.x. Note the schema change from 2.x: `ingester` and `compactor` are no
+# longer top-level keys and are rejected outright rather than ignored.
+stream_over_http_enabled: true
+
+server:
+  http_listen_port: 3200
+
+distributor:
+  receivers:
+    otlp:
+      protocols:
+        # Offset from the collector's own ports so both run on one host.
+        grpc: { endpoint: 127.0.0.1:4417 }
+        http: { endpoint: 127.0.0.1:4418 }
+
+storage:
+  trace:
+    backend: local
+    wal:   { path: ./tempo-data/wal }
+    local: { path: ./tempo-data/blocks }

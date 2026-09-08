@@ -1,0 +1,16 @@
+[package]
+name = "tz-bench"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
+tz-core = { workspace = true }
+tz-embed = { workspace = true }
+tz-eval = { workspace = true }
+tz-retrieve = { workspace = true }
+anyhow = { workspace = true }
+tokio = { workspace = true }
+hdrhistogram = { workspace = true }
+qdrant-client = { workspace = true }
+rand = { workspace = true }
