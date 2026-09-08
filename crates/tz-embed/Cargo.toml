@@ -1,0 +1,21 @@
+[package]
+name = "tz-embed"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
+tz-core = { workspace = true }
+anyhow = { workspace = true }
+thiserror = { workspace = true }
+tracing = { workspace = true }
+serde = { workspace = true }
+hdrhistogram = { workspace = true }
+
+[dependencies.fastembed]
+version = "6"
+default-features = false
+features = ["hf-hub-rustls-tls", "ort-download-binaries-rustls-tls"]
+
+[dev-dependencies]
+tokio = { workspace = true }
